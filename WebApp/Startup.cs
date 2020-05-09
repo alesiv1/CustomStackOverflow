@@ -7,6 +7,9 @@ using WebApp.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using AutoMapper;
+using WebApp.Models.FluentValidation;
+using FluentValidation.AspNetCore;
 
 namespace WebApp
 {
@@ -28,6 +31,12 @@ namespace WebApp
 				.AddEntityFrameworkStores<ApplicationDbContext>();
 			services.AddControllersWithViews();
 			services.AddRazorPages();
+			services.AddAutoMapper(typeof(Startup));
+
+			services.AddMvc(opt =>
+			{
+				opt.Filters.Add(typeof(ValidatorActionFilter));
+			}).AddFluentValidation(fvc => fvc.RegisterValidatorsFromAssemblyContaining<Startup>());
 		}
 
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
