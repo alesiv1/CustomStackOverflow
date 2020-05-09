@@ -9,6 +9,6 @@ namespace WebApp.Data.Entities
 		public int Views { get; set; }
 		public ICollection<QuestionVisitorEntity> Visitors { get; set; }
 		public ICollection<AnswerEntity> Answers { get; set; }
-		public ICollection<QuestionTag> Tags { get; set; }
+		public ICollection<QuestionTagEntity> Tags { get; set; }
 	}
 }

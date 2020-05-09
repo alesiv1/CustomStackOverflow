@@ -7,6 +7,6 @@ namespace WebApp.Data.Entities
 	{
 		public int Id { get; set; }
 		public string Name { get; set; }
-		public ICollection<QuestionTag> Questions { get; set; }
+		public ICollection<QuestionTagEntity> Questions { get; set; }
 	}
 }

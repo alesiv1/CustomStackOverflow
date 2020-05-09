@@ -2,7 +2,7 @@
 
 namespace WebApp.Data.Entities
 {
-	public class QuestionTag
+	public class QuestionTagEntity
 	{
 		public int QuestionId { get; set; }
 		public QuestionEntity Question { get; set; }
