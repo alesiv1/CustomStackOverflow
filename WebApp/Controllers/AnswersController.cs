@@ -106,6 +106,37 @@ namespace WebApp.Controllers
             return View(answerEntity);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeVotes(int id)
+        {
+            var answerEntity = await _context.Answers
+                .Include(x => x.Visitors)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (answerEntity == null)
+            {
+                return NotFound();
+            }
+
+            var user = await GetCurentUser();
+            var visitor = answerEntity.Visitors.FirstOrDefault(x => x.CustomerId == user.Id);
+            if (visitor == null)
+            {
+                var visitorEntity = CreateVisitor(id, user.Id);
+                _context.AnswerVisitors.Add(visitorEntity);
+                await _context.SaveChangesAsync();
+
+                answerEntity.Visitors.Add(visitorEntity);
+                _context.Answers.Update(answerEntity);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                visitor.IsVotes = !visitor.IsVotes;
+            }
+            return RedirectToAction("Details", "Questions", new { id = GetQuestionId(answerEntity.Id) });
+        }
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -167,6 +198,15 @@ namespace WebApp.Controllers
                 .Include(x => x.Answers)
                 .FirstOrDefault(x => x.Answers.Any(a => a.Id == answerId))
                 .Id;
+        }
+        private AnswerVisitorEntity CreateVisitor(int answerId, string userId)
+        {
+            var visitor = new AnswerVisitorEntity();
+            visitor.Id = 0;
+            visitor.CustomerId = userId;
+            visitor.IsVotes = true;
+            visitor.AnswerId = answerId;
+            return visitor;
         }
         #endregion
     }
