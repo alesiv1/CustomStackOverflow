@@ -25,22 +25,32 @@ namespace WebApp.Controllers
             return View(await _context.Answers.ToListAsync());
         }
 
-        public IActionResult Create()
+        public IActionResult Create(int id)
         {
-            return View();
+            return View(new AnswerEntity() { Id = id});
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Content")] AnswerEntity answerEntity)
         {
+            var id = answerEntity.Id;
             if (ModelState.IsValid)
             {
-                answerEntity = await CreateAnswer(answerEntity);
-                _context.Add(answerEntity);
+                var answer = await CreateAnswer(answerEntity);
+                _context.Answers.Add(answer);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Details", "Questions", new { id = GetQuestionId(answerEntity.Id) });
+
+                var questionEntity = _context.Questions
+                    .Include(x => x.Answers)
+                    .FirstOrDefault(x => x.Id == id);
+                questionEntity.Answers.Add(answer);
+                _context.Questions.Update(questionEntity);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction("Details", "Questions", new { id = id });
             }
+            answerEntity.Id = id;
             return View(answerEntity);
         }
 
@@ -138,13 +148,14 @@ namespace WebApp.Controllers
         {
             return _context.Answers.Any(e => e.Id == id);
         }
-        private async Task<AnswerEntity> CreateAnswer(AnswerEntity questionEntity)
+        private async Task<AnswerEntity> CreateAnswer(AnswerEntity answerEntity)
         {
             var user = await GetCurentUser();
-            questionEntity.Author = user.UserName;
-            questionEntity.AuthorId = user.Id;
-            questionEntity.Created = DateTime.Now;
-            return questionEntity;
+            answerEntity.Author = user.UserName;
+            answerEntity.AuthorId = user.Id;
+            answerEntity.Created = DateTime.Now;
+            answerEntity.Id = 0;
+            return answerEntity;
         }
         private async Task<IdentityUser> GetCurentUser()
         {
