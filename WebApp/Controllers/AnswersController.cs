@@ -106,8 +106,6 @@ namespace WebApp.Controllers
             return View(answerEntity);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangeVotes(int id)
         {
             var answerEntity = await _context.Answers
@@ -128,13 +126,13 @@ namespace WebApp.Controllers
 
                 answerEntity.Visitors.Add(visitorEntity);
                 _context.Answers.Update(answerEntity);
-                await _context.SaveChangesAsync();
             }
             else
             {
                 visitor.IsVotes = !visitor.IsVotes;
             }
-            return RedirectToAction("Details", "Questions", new { id = GetQuestionId(answerEntity.Id) });
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Details", "Questions", new { id = GetQuestionId(answerEntity.Id), addView = false });
         }
 
         public async Task<IActionResult> Delete(int? id)

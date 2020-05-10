@@ -30,7 +30,7 @@ namespace WebApp.Controllers
             return View(questions);
         }
 
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, bool addView = true)
         {
             if (id == null)
             {
@@ -57,6 +57,13 @@ namespace WebApp.Controllers
             if (questionEntity == null)
             {
                 return NotFound();
+            }
+
+            if (addView)
+            {
+                questionEntity.Views++;
+                _context.Questions.Update(questionEntity);
+                await _context.SaveChangesAsync();
             }
 
             return View(questionEntity);
@@ -132,8 +139,6 @@ namespace WebApp.Controllers
             return View(questionEntity);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangeVotes(int id)
         {
             var questionEntity = await _context.Questions
@@ -154,13 +159,13 @@ namespace WebApp.Controllers
 
                 questionEntity.Visitors.Add(visitorEntity);
                 _context.Questions.Update(questionEntity);
-                await _context.SaveChangesAsync();
             }
             else
             {
                 visitor.IsVotes = !visitor.IsVotes;
             }
-            return RedirectToAction(nameof(Details), new { id = id });
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
         public async Task<IActionResult> Delete(int? id)
         {

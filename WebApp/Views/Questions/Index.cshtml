@@ -24,6 +24,7 @@
             <td>
 
                 <p>Votes: @item.Visitors.Where(x => x.IsVotes).Count()</p>
+                <a asp-action="ChangeVotes" asp-controller="Questions" asp-route-id="@item.Id">Change votes</a>
                 <p>Answers: @Html.DisplayFor(modelItem => item.Answers.Count)</p>
                 <p>Views: @Html.DisplayFor(modelItem => item.Views)</p>
             </td>

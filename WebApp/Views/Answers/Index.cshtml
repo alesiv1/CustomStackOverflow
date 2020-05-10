@@ -22,6 +22,7 @@
         <tr>
             <td>
                 <p>Votes: @item.Visitors.Where(x => x.IsVotes).Count()</p>
+                <a asp-action="ChangeVotes" asp-controller="Answers" asp-route-id="@item.Id">Change votes</a>
             </td>
             <td>
                 <p>
