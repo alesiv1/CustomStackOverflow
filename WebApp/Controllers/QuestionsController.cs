@@ -22,7 +22,12 @@ namespace WebApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Questions.ToListAsync());
+            var questions = await _context.Questions
+                .Include(x => x.Answers)
+                .Include(x => x.Visitors)
+                .Include(x => x.Tags)
+                .ToListAsync();
+            return View(questions);
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -37,6 +42,17 @@ namespace WebApp.Controllers
                 .Include(x => x.Visitors)
                 .Include(x => x.Tags)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
+            foreach(var answer in questionEntity.Answers)
+            {
+                var answerEntity = await _context.Answers
+                .Include(x => x.Comments)
+                .Include(x => x.Visitors)
+                .FirstOrDefaultAsync(m => m.Id == answer.Id);
+
+                questionEntity.Answers.FirstOrDefault(x => x.Id == answer.Id).Comments = answerEntity.Comments;
+                questionEntity.Answers.FirstOrDefault(x => x.Id == answer.Id).Visitors = answerEntity.Visitors;
+            }
 
             if (questionEntity == null)
             {
@@ -162,6 +178,7 @@ namespace WebApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        #region Private methods
         private bool QuestionEntityExists(int id)
         {
             return _context.Questions.Any(e => e.Id == id);
@@ -180,6 +197,7 @@ namespace WebApp.Controllers
         {
             return await _userManager.GetUserAsync(HttpContext.User);
         }
-    }
+		#endregion
+	}
 }
  
