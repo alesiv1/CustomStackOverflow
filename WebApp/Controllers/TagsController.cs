@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApp.Data;
@@ -8,6 +9,7 @@ using WebApp.Data.Entities;
 
 namespace WebApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class TagsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -17,13 +19,11 @@ namespace WebApp.Controllers
             _context = context;
         }
 
-        // GET: Tags
         public async Task<IActionResult> Index()
         {
             return View(await _context.Tags.ToListAsync());
         }
 
-        // GET: Tags/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -41,15 +41,11 @@ namespace WebApp.Controllers
             return View(tagEntity);
         }
 
-        // GET: Tags/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Tags/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name")] TagEntity tagEntity)
@@ -63,7 +59,6 @@ namespace WebApp.Controllers
             return View(tagEntity);
         }
 
-        // GET: Tags/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -79,9 +74,6 @@ namespace WebApp.Controllers
             return View(tagEntity);
         }
 
-        // POST: Tags/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] TagEntity tagEntity)
@@ -114,7 +106,6 @@ namespace WebApp.Controllers
             return View(tagEntity);
         }
 
-        // GET: Tags/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -132,7 +123,6 @@ namespace WebApp.Controllers
             return View(tagEntity);
         }
 
-        // POST: Tags/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

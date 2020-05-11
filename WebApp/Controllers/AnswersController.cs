@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using WebApp.Data.Entities;
 
 namespace WebApp.Controllers
 {
+    [Authorize]
     public class AnswersController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -63,7 +65,7 @@ namespace WebApp.Controllers
 
             var answerEntity = await _context.Answers.FindAsync(id);
             var user = await GetCurentUser();
-            if (user.Id != answerEntity.AuthorId && User.IsInRole("Admin"))
+            if (user.Id != answerEntity.AuthorId && !User.IsInRole("Admin"))
             {
                 return RedirectToAction("Details", "Questions", new { id = GetQuestionId(answerEntity.Id) });
             }
@@ -87,7 +89,9 @@ namespace WebApp.Controllers
             {
                 try
                 {
-                    _context.Update(answerEntity);
+                    var answer = await _context.Answers.FirstOrDefaultAsync(x => x.Id == answerEntity.Id);
+                    answer.Content = answerEntity.Content;
+                    _context.Answers.Update(answer);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -145,7 +149,7 @@ namespace WebApp.Controllers
             var answerEntity = await _context.Answers
                 .FirstOrDefaultAsync(m => m.Id == id);
             var user = await GetCurentUser();
-            if (user.Id != answerEntity.AuthorId && User.IsInRole("Admin"))
+            if (user.Id != answerEntity.AuthorId && !User.IsInRole("Admin"))
             {
                 return RedirectToAction("Details", "Questions", new { id = GetQuestionId(answerEntity.Id) });
             }

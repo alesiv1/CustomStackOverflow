@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using WebApp.Data.Entities;
 
 namespace WebApp.Controllers
 {
+    [Authorize]
     public class QuestionsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -20,6 +22,7 @@ namespace WebApp.Controllers
             _userManager = userManager;
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var questions = await _context.Questions
@@ -30,6 +33,7 @@ namespace WebApp.Controllers
             return View(questions);
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id, bool addView = true)
         {
             if (id == null)
@@ -96,7 +100,7 @@ namespace WebApp.Controllers
             }
             var questionEntity = await _context.Questions.FindAsync(id);
             var user = await GetCurentUser();
-            if (user.Id != questionEntity.AuthorId && User.IsInRole("Admin"))
+            if (user.Id != questionEntity.AuthorId && !User.IsInRole("Admin"))
             {
                 return RedirectToAction(nameof(Index));
             }
@@ -120,6 +124,10 @@ namespace WebApp.Controllers
             {
                 try
                 {
+                    var question = await _context.Questions.FirstOrDefaultAsync(x => x.Id == questionEntity.Id);
+                    question.Content = questionEntity.Content;
+                    question.Title = questionEntity.Title;
+                    _context.Questions.Update(question);
                     _context.Update(questionEntity);
                     await _context.SaveChangesAsync();
                 }
@@ -177,7 +185,7 @@ namespace WebApp.Controllers
             var questionEntity = await _context.Questions
                 .FirstOrDefaultAsync(m => m.Id == id);
             var user = await GetCurentUser();
-            if (user.Id != questionEntity.AuthorId && User.IsInRole("Admin"))
+            if (user.Id != questionEntity.AuthorId && !User.IsInRole("Admin"))
             {
                 return RedirectToAction(nameof(Index));
             }

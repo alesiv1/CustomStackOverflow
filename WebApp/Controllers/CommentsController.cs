@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using WebApp.Data.Entities;
 
 namespace WebApp.Controllers
 {
+    [Authorize]
     public class CommentsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -34,7 +36,7 @@ namespace WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Content")] CommentEntity commentEntity)
         {
-            var id = commentEntity.Id;
+            var answerId = commentEntity.Id;
             if (ModelState.IsValid)
             {
                 var comment = await CreateComment(commentEntity);
@@ -43,14 +45,14 @@ namespace WebApp.Controllers
 
                 var answerEntity = _context.Answers
                     .Include(x => x.Comments)
-                    .FirstOrDefault(x => x.Id == id);
+                    .FirstOrDefault(x => x.Id == answerId);
                 answerEntity.Comments.Add(comment);
                 _context.Answers.Update(answerEntity);
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction("Details", "Questions", new { id = id });
+                return RedirectToAction("Details", "Questions", new { id = GetQuestionId(comment.Id), addView = false});
             }
-            commentEntity.Id = id;
+            commentEntity.Id = answerId;
             return View(commentEntity);
         }
 
@@ -64,7 +66,7 @@ namespace WebApp.Controllers
             var commentEntity = await _context.Comments.FindAsync(id);
 
             var user = await GetCurentUser();
-            if (user.Id != commentEntity.AuthorId && User.IsInRole("Admin"))
+            if (user.Id != commentEntity.AuthorId && !User.IsInRole("Admin"))
             {
                 return RedirectToAction("Details", "Questions", new { id = GetQuestionId(commentEntity.Id) });
             }
@@ -89,7 +91,9 @@ namespace WebApp.Controllers
             {
                 try
                 {
-                    _context.Update(commentEntity);
+                    var comment = await _context.Comments.FirstOrDefaultAsync(x => x.Id == commentEntity.Id);
+                    comment.Content = commentEntity.Content;
+                    _context.Comments.Update(comment);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -119,7 +123,7 @@ namespace WebApp.Controllers
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             var user = await GetCurentUser();
-            if (user.Id != commentEntity.AuthorId && User.IsInRole("Admin"))
+            if (user.Id != commentEntity.AuthorId && !User.IsInRole("Admin"))
             {
                 return RedirectToAction("Details", "Questions", new { id = GetQuestionId(commentEntity.Id) });
             }
