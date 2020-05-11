@@ -143,7 +143,7 @@ namespace WebApp.Controllers
             var commentEntity = await _context.Comments.FindAsync(id);
             _context.Comments.Remove(commentEntity);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Details", "Questions", new { id = GetQuestionId(commentEntity.Id) });
         }
 
         #region Private methods
