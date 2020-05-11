@@ -7,14 +7,14 @@
 }
 @if (SignInManager.IsSignedIn(User))
 {
-    <p>Now you can visit uestion page</p>
+    <p>Now you can visit Question page</p>
 }
 else
 {
     <div class="text-center">
         <h1 class="display-3">Welcome to the system =)</h1>
         <p>You must register or login before using the system.</p>
-        <p><a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register.</a></p>
-        <p><a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login.</a></p>
+        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
     </div>
 }

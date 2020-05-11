@@ -39,8 +39,10 @@
                 <tbody>
                     <tr>
                         <td>
-                            <p>Votes: @answer.Visitors.Where(x => x.IsVotes).Count()</p>
-                            <a asp-action="ChangeVotes" asp-controller="Answers" asp-route-id="@answer.Id">Change votes</a>
+                            <p>
+                                Votes: @answer.Visitors.Where(x => x.IsVotes).Count()
+                                <a asp-action="ChangeVotes" asp-controller="Answers" asp-route-id="@answer.Id">Change votes</a>
+                            </p>
                         </td>
                         <td>
                             <p>

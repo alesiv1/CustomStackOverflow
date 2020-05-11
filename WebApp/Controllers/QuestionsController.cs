@@ -128,7 +128,7 @@ namespace WebApp.Controllers
                     question.Content = questionEntity.Content;
                     question.Title = questionEntity.Title;
                     _context.Questions.Update(question);
-                    _context.Update(questionEntity);
+                    _context.Questions.Update(question);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)

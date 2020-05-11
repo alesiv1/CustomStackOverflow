@@ -50,7 +50,7 @@ namespace WebApp.Controllers
                 _context.Questions.Update(questionEntity);
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction("Details", "Questions", new { id = id });
+                return RedirectToAction("Details", "Questions", new { id = id, addView = false });
             }
             answerEntity.Id = id;
             return View(answerEntity);
@@ -67,7 +67,7 @@ namespace WebApp.Controllers
             var user = await GetCurentUser();
             if (user.Id != answerEntity.AuthorId && !User.IsInRole("Admin"))
             {
-                return RedirectToAction("Details", "Questions", new { id = GetQuestionId(answerEntity.Id) });
+                return RedirectToAction("Details", "Questions", new { id = GetQuestionId(answerEntity.Id), addView = false });
             }
             if (answerEntity == null)
             {
@@ -105,7 +105,7 @@ namespace WebApp.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction("Details", "Questions", new { id = GetQuestionId(answerEntity.Id) });
+                return RedirectToAction("Details", "Questions", new { id = GetQuestionId(answerEntity.Id), addView = false });
             }
             return View(answerEntity);
         }
@@ -151,7 +151,7 @@ namespace WebApp.Controllers
             var user = await GetCurentUser();
             if (user.Id != answerEntity.AuthorId && !User.IsInRole("Admin"))
             {
-                return RedirectToAction("Details", "Questions", new { id = GetQuestionId(answerEntity.Id) });
+                return RedirectToAction("Details", "Questions", new { id = GetQuestionId(answerEntity.Id), addView = false });
             }
             if (answerEntity == null)
             {
@@ -169,11 +169,12 @@ namespace WebApp.Controllers
                 .Include(x => x.Comments)
                 .Include(x => x.Visitors)
                 .FirstOrDefaultAsync(x => x.Id == id);
+            var questionId = GetQuestionId(id);
             _context.AnswerVisitors.RemoveRange(answerEntity.Visitors);
             _context.Comments.RemoveRange(answerEntity.Comments);
             _context.Answers.Remove(answerEntity);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Details", "Questions", new { id = questionId, addView = false });
         }
 
         #region Private methods

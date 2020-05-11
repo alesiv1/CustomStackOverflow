@@ -68,7 +68,7 @@ namespace WebApp.Controllers
             var user = await GetCurentUser();
             if (user.Id != commentEntity.AuthorId && !User.IsInRole("Admin"))
             {
-                return RedirectToAction("Details", "Questions", new { id = GetQuestionId(commentEntity.Id) });
+                return RedirectToAction("Details", "Questions", new { id = GetQuestionId(commentEntity.Id), addView = false });
             }
 
             if (commentEntity == null)
@@ -107,7 +107,7 @@ namespace WebApp.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction("Details", "Questions", new { id = GetQuestionId(commentEntity.Id) });
+                return RedirectToAction("Details", "Questions", new { id = GetQuestionId(commentEntity.Id), addView = false });
             }
             return View(commentEntity);
         }
@@ -125,7 +125,7 @@ namespace WebApp.Controllers
             var user = await GetCurentUser();
             if (user.Id != commentEntity.AuthorId && !User.IsInRole("Admin"))
             {
-                return RedirectToAction("Details", "Questions", new { id = GetQuestionId(commentEntity.Id) });
+                return RedirectToAction("Details", "Questions", new { id = GetQuestionId(commentEntity.Id), addView = false });
             }
 
             if (commentEntity == null)
@@ -141,9 +141,10 @@ namespace WebApp.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var commentEntity = await _context.Comments.FindAsync(id);
+            var questionId = GetQuestionId(id);
             _context.Comments.Remove(commentEntity);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Details", "Questions", new { id = GetQuestionId(commentEntity.Id) });
+            return RedirectToAction("Details", "Questions", new { id = questionId, addView = false });
         }
 
         #region Private methods
